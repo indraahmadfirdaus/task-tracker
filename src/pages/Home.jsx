@@ -12,8 +12,75 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { FaTrash, FaCheck } from "react-icons/fa";
+import List from "../components/List";
 
 const Home = (props) => {
+  const [task, setTask] = useState([]);
+  const [formValue, setFormValue] = useState("");
+  const [count, setCount] = useState(0);
+
+  const handleClickAddTodo = () => {
+    // setState <- one way data binding
+    // [1,2,3] <- 4
+
+    // yang terjadi
+    // bukan [1,2,3] terus di push 4
+
+    // tapi yang terjadi
+    // [1,2,3] dibuang
+    // assign value baru [1,2,3,4]
+    const newTodo = {
+      id: task.length + 1,
+      title: formValue,
+      isComplete: false,
+    };
+
+    const newTasks = [...task, newTodo];
+
+    setTask(newTasks);
+    setFormValue("");
+  };
+
+  const onUpdateTask = (id) => {
+    // [
+    //   { id: 1, title: "jajan", isComplete: false },
+    //   { id: 2, title: "beli sate", isComplete: false },
+    // ];
+
+    // 1. temukan item yang mau kita ubah
+    // 2. item tersebut ubah jadi complete
+    // 3. return sisanya
+
+    const updatedTask = task.map((each) => {
+      if (each.id === id) {
+        // step 1
+        return {
+          ...each,
+          isComplete: true, // step 2
+        };
+      }
+      return each; // step 3
+    });
+
+    setTask(updatedTask);
+  };
+
+  const onDeleteTask = (id) => {
+    // [
+    //   { id: 1, title: "jajan", isComplete: false },
+    //   { id: 2, title: "beli sate", isComplete: false },
+    // ];
+    const filteredTask = task.filter((each) => each.id !== id);
+    setTask(filteredTask);
+  };
+
+  // USE EFFECT DAN LIFECYCLE
+  useEffect(() => {
+    setCount(task.length);
+  }, [task]);
+  // kalo kosong, dia masuk component did mount
+  // kalo ada isinya, dia akan dengarkan perubahan dari state tersebut, jika ada perubahan maka dia akan terus menjalankan (component did update)
+
   return (
     <Box
       w={{ base: "80%", md: "60%", lg: "60%" }}
@@ -23,6 +90,7 @@ const Home = (props) => {
       shadow="xl"
       pb="4"
     >
+      {/* {JSON.stringify(task)} */}
       <Flex direction="column" alignItems="center">
         <Text
           fontSize="3xl"
@@ -31,7 +99,7 @@ const Home = (props) => {
           textAlign="center"
           mt="4"
         >
-          Task Tracker nya
+          Task Tracker
         </Text>
         <Divider
           w="50%"
@@ -47,8 +115,16 @@ const Home = (props) => {
           placeholder="add task here ..."
           w="60%"
           mr="4"
+          onChange={(event) => {
+            setFormValue(event.target.value);
+          }}
+          value={formValue}
         />
-        <Button bgColor="orange.200" color="orange.500">
+        <Button
+          bgColor="orange.200"
+          color="orange.500"
+          onClick={handleClickAddTodo}
+        >
           Add
         </Button>
       </Flex>
@@ -60,20 +136,19 @@ const Home = (props) => {
         height="70%"
         overflowX="hidden"
       >
-        <HStack
-          bgColor={"orange.200"}
-          color={"orange.500"}
-          w="90%"
-          px={4}
-          py={2}
-          borderRadius="xl"
-          my="1"
-        >
-          <Text fontWeight="bold">{"dummy title"}</Text>
-          <Spacer />
-          <IconButton bgColor="white" icon={<FaCheck />} />
-          <IconButton bgColor="white" icon={<FaTrash />} />
-        </HStack>
+        <p>Anda mempunyai {count} pekerjaan</p>
+        {/* LIST - START*/}
+        {task.map((each) => {
+          return (
+            <List
+              key={each.id}
+              task={each}
+              onDeleteTask={onDeleteTask}
+              onUpdateTask={onUpdateTask}
+            />
+          );
+        })}
+        {/* LIST -  END */}
       </Flex>
       <Flex justify="center">
         <Button bgColor="green.200" color="green.600">
