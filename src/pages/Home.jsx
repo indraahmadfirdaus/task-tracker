@@ -150,14 +150,14 @@ const Home = (props) => {
         })}
         {/* LIST -  END */}
       </Flex>
-      <Flex justify="center">
+      {/* <Flex justify="center">
         <Button bgColor="green.200" color="green.600">
           See Completed Only
         </Button>
         <Button bgColor="gray.200" color="gray.600">
           See All Tasks
         </Button>
-      </Flex>
+      </Flex> */}
     </Box>
   );
 };
