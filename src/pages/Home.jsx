@@ -4,16 +4,42 @@ import {
   Box,
   Divider,
   Flex,
-  Input,
   Button,
-  Spacer,
-  HStack,
-  IconButton,
-  useToast,
 } from "@chakra-ui/react";
-import { FaTrash, FaCheck } from "react-icons/fa";
+import Form from "../components/Form";
+import List from "../components/List";
 
-const Home = (props) => {
+const Home = () => {
+  const [todos, setTodos] = useState([])
+  const [toggleComplete, setToggleComplete] = useState(false)
+  const [renderTodos, setRenderTodos] = useState([])
+
+  function handleDeleteTodoById(id) {
+    const filtered = todos.filter(todo => Number(todo.id) !== Number(id))
+    setTodos(filtered)
+  }
+
+  function handleUpdateTodoById(id) {
+    const newValue = todos.map(todo => {
+
+      if (Number(todo.id) === Number(id)) {
+        todo.isComplete = true
+      }
+
+      return todo
+    })
+    setTodos(newValue)
+  }
+
+  useEffect(() => {
+    if(toggleComplete) {
+      const completedTodos = todos.filter(todo => todo.isComplete)
+      setRenderTodos(completedTodos)
+    } else {
+      setRenderTodos(todos)
+    }
+  },[toggleComplete, todos])
+
   return (
     <Box
       w={{ base: "80%", md: "60%", lg: "60%" }}
@@ -31,7 +57,7 @@ const Home = (props) => {
           textAlign="center"
           mt="4"
         >
-          Task Tracker nya
+          Task Tracker
         </Text>
         <Divider
           w="50%"
@@ -42,15 +68,7 @@ const Home = (props) => {
         />
       </Flex>
       <Flex justify="center" mt="4">
-        <Input
-          variant="filled"
-          placeholder="add task here ..."
-          w="60%"
-          mr="4"
-        />
-        <Button bgColor="orange.200" color="orange.500">
-          Add
-        </Button>
+        <Form setTodos={setTodos} todos={todos} />
       </Flex>
       <Flex
         alignItems="center"
@@ -60,28 +78,28 @@ const Home = (props) => {
         height="70%"
         overflowX="hidden"
       >
-        <HStack
-          bgColor={"orange.200"}
-          color={"orange.500"}
-          w="90%"
-          px={4}
-          py={2}
-          borderRadius="xl"
-          my="1"
-        >
-          <Text fontWeight="bold">{"dummy title"}</Text>
-          <Spacer />
-          <IconButton bgColor="white" icon={<FaCheck />} />
-          <IconButton bgColor="white" icon={<FaTrash />} />
-        </HStack>
+        {
+          renderTodos.map((todo, index) => (
+            <List key={index} todo={todo} handleDeleteTodoById={handleDeleteTodoById} handleUpdateTodoById={handleUpdateTodoById} />
+          )
+          )
+        }
       </Flex>
       <Flex justify="center">
-        <Button bgColor="green.200" color="green.600">
-          See Completed Only
-        </Button>
-        <Button bgColor="gray.200" color="gray.600">
-          See All Tasks
-        </Button>
+        {
+          toggleComplete ?
+            (
+              <Button bgColor="gray.200" color="gray.600" onClick={() => { setToggleComplete(false)}}>
+                See All Tasks
+              </Button>
+            )
+            :
+            (
+              <Button bgColor="green.200" color="green.600" onClick={() => { setToggleComplete(true)}}>
+                See Completed Only
+              </Button>
+            )
+        }
       </Flex>
     </Box>
   );
