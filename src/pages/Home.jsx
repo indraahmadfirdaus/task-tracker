@@ -8,37 +8,33 @@ import {
 } from "@chakra-ui/react";
 import Form from "../components/Form";
 import List from "../components/List";
+import axios from "axios";
+import { DB } from "../db/firebase";
+import { collection, getDocs } from "firebase/firestore";
 
 const Home = () => {
   const [todos, setTodos] = useState([])
-  const [toggleComplete, setToggleComplete] = useState(false)
-  const [renderTodos, setRenderTodos] = useState([])
 
-  function handleDeleteTodoById(id) {
-    const filtered = todos.filter(todo => Number(todo.id) !== Number(id))
-    setTodos(filtered)
-  }
+  // async function fetchTodos() {
+  //   try {
+  //     const { data }  = await axios.get('http://localhost:3004/todos')
+  //     setTodos(data)
+  //   } catch (error) {
+  //     // handling error disini
+  //     console.log(error);
+  //   }
+  // }
 
-  function handleUpdateTodoById(id) {
-    const newValue = todos.map(todo => {
-
-      if (Number(todo.id) === Number(id)) {
-        todo.isComplete = true
-      }
-
-      return todo
-    })
-    setTodos(newValue)
+  const fetchPost = async () => {
+    const querySnapshot = await getDocs(collection(DB, "todos"));
+    const dataRes = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+    setTodos(dataRes);
   }
 
   useEffect(() => {
-    if(toggleComplete) {
-      const completedTodos = todos.filter(todo => todo.isComplete)
-      setRenderTodos(completedTodos)
-    } else {
-      setRenderTodos(todos)
-    }
-  },[toggleComplete, todos])
+    fetchPost()
+    // fetchTodos()
+  },[])
 
   return (
     <Box
@@ -68,7 +64,7 @@ const Home = () => {
         />
       </Flex>
       <Flex justify="center" mt="4">
-        <Form setTodos={setTodos} todos={todos} />
+        <Form setTodos={setTodos} todos={todos} fetchTodos={fetchPost} />
       </Flex>
       <Flex
         alignItems="center"
@@ -79,14 +75,14 @@ const Home = () => {
         overflowX="hidden"
       >
         {
-          renderTodos.map((todo, index) => (
-            <List key={index} todo={todo} handleDeleteTodoById={handleDeleteTodoById} handleUpdateTodoById={handleUpdateTodoById} />
+          todos.map((todo, index) => (
+            <List key={index} todo={todo} fetchPost={fetchPost} />
           )
           )
         }
       </Flex>
       <Flex justify="center">
-        {
+        {/* {
           toggleComplete ?
             (
               <Button bgColor="gray.200" color="gray.600" onClick={() => { setToggleComplete(false)}}>
@@ -99,7 +95,7 @@ const Home = () => {
                 See Completed Only
               </Button>
             )
-        }
+        } */}
       </Flex>
     </Box>
   );

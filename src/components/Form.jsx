@@ -1,16 +1,25 @@
 import { Button, Input } from '@chakra-ui/react'
+import axios from 'axios'
+import { addDoc, collection } from 'firebase/firestore'
 import React, { useState } from 'react'
+import { DB } from '../db/firebase'
 
-const Form = ({ todos, setTodos }) => {
+const Form = ({ todos, fetchTodos }) => {
   const [task, setTask] = useState('')
-  function onHandleAddTodo() {
-    const payload = {
-      id: todos.length,
-      task: task,
-      isComplete: false
+  async function onHandleAddTodo() {
+    try {
+      const payload = {
+        task: task,
+        isComplete: false
+      }
+      await addDoc(collection(DB, "todos"), payload);
+      setTask('')
+      fetchTodos()
+    } catch (error) {
+      // handling error disini
+      console.log(error);
     }
-    setTodos([...todos, payload])
-    setTask('')
+
   }
 
   return (

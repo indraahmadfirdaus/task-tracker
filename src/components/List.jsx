@@ -1,8 +1,32 @@
 import { HStack, IconButton, Spacer, Text } from '@chakra-ui/react'
+import { collection, deleteDoc, doc, setDoc } from 'firebase/firestore';
 import React from 'react'
 import { FaCheck, FaTrash } from 'react-icons/fa'
+import { DB } from '../db/firebase';
 
-const List = ({ todo, handleDeleteTodoById, handleUpdateTodoById }) => {
+const List = ({ todo, fetchPost }) => {
+  async function handleDeleteTodoById(id) {
+    try {
+      await deleteDoc(doc(collection(DB, "todos"), id));
+      // refetch
+      fetchPost()
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async function handleUpdateTodoById(id) {
+    try {
+      const updatedTodoData = {
+        isComplete: true
+      };
+      await setDoc(doc(collection(DB, "todos"), id), updatedTodoData, { merge: true });
+      fetchPost()
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   return (
     <HStack
       bgColor={todo.isComplete ? "green.200" : "orange.200"}
